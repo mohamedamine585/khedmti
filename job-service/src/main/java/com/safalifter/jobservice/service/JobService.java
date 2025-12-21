@@ -7,6 +7,7 @@ import com.safalifter.jobservice.model.Job;
 import com.safalifter.jobservice.repository.JobRepository;
 import com.safalifter.jobservice.request.job.JobCreateRequest;
 import com.safalifter.jobservice.request.job.JobUpdateRequest;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker; // IMPORTANT
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -23,9 +24,11 @@ public class JobService {
     private final FileStorageClient fileStorageClient;
     private final ModelMapper modelMapper;
 
+    // --- MÉTHODES AVEC RESILIENCE4J ---
+
+    @CircuitBreaker(name = "fileStorage", fallbackMethod = "createJobFallback")
     public Job createJob(JobCreateRequest request, MultipartFile file) {
         Category category = categoryService.getCategoryById(request.getCategoryId());
-
         String imageId = null;
 
         if (file != null)
@@ -41,16 +44,20 @@ public class JobService {
                 .build());
     }
 
-    public List<Job> getAll() {
-        return jobRepository.findAll();
+    public Job createJobFallback(JobCreateRequest request, MultipartFile file, Exception e) {
+        Category category = categoryService.getCategoryById(request.getCategoryId());
+        return jobRepository.save(Job.builder()
+                .name(request.getName() + " (Image non disponible)")
+                .description(request.getDescription())
+                .category(category)
+                .keys(new ArrayList<>())
+                .imageId(null)
+                .build());
     }
 
-    public Job getJobById(String id) {
-        return findJobById(id);
-    }
-
+    @CircuitBreaker(name = "fileStorage", fallbackMethod = "updateJobFallback")
     public Job updateJob(JobUpdateRequest request, MultipartFile file) {
-        Job toUpdate = findJobById(request.getCategoryId());
+        Job toUpdate = findJobById(request.getId()); // Correction ici: getId() au lieu de getCategoryId()
         modelMapper.map(request, toUpdate);
 
         if (file != null) {
@@ -60,8 +67,21 @@ public class JobService {
                 toUpdate.setImageId(imageId);
             }
         }
-
         return jobRepository.save(toUpdate);
+    }
+
+    public Job updateJobFallback(JobUpdateRequest request, MultipartFile file, Exception e) {
+        return findJobById(request.getId());
+    }
+
+    // --- MÉTHODES DONT LE CONTROLLER A BESOIN (À NE PAS SUPPRIMER) ---
+
+    public List<Job> getAll() {
+        return jobRepository.findAll();
+    }
+
+    public Job getJobById(String id) {
+        return findJobById(id);
     }
 
     public void deleteJobById(String id) {
