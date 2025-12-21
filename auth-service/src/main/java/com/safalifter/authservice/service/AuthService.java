@@ -6,6 +6,8 @@ import com.safalifter.authservice.dto.TokenDto;
 import com.safalifter.authservice.exc.WrongCredentialsException;
 import com.safalifter.authservice.request.LoginRequest;
 import com.safalifter.authservice.request.RegisterRequest;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker; 
+import io.github.resilience4j.retry.annotation.Retry; 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,7 +31,19 @@ public class AuthService {
         else throw new WrongCredentialsException("Wrong credentials");
     }
 
+    
+    @CircuitBreaker(name = "userService", fallbackMethod = "registerFallback")
+    @Retry(name = "userService")
     public RegisterDto register(RegisterRequest request) {
         return userServiceClient.save(request).getBody();
+    }
+
+    // Méthode de secours (Fallback)
+    // Elle doit avoir la même signature + l'argument Exception
+    public RegisterDto registerFallback(RegisterRequest request, Exception e) {
+        return RegisterDto.builder()
+                .username("Service temporairement indisponible")
+                .email("Veuillez réessayer plus tard")
+                .build();
     }
 }
