@@ -21,6 +21,7 @@ public class CustomErrorDecoder implements ErrorDecoder {
             Map<String, String> errors =
                     mapper.readValue(IOUtils.toString(body, StandardCharsets.UTF_8), Map.class);
             if (response.status() == 400) {
+                System.out.println("Validation errors: " + errors);
                 return ValidationException.builder()
                         .validationErrors(errors).build();
             } else
