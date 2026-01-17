@@ -10,6 +10,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry; 
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter; 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -52,10 +53,17 @@ public class AuthService {
     }
 
     // --- REGISTER ---
-    @CircuitBreaker(name = "userService", fallbackMethod = "registerFallback")
-    @Retry(name = "userService")
     public RegisterDto register(RegisterRequest request) {
-        return userServiceClient.save(request).getBody();
+        try {
+            ResponseEntity<RegisterDto> registerDto = userServiceClient.save(request);
+            if(registerDto != null){
+                return registerDto.getBody();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     public RegisterDto registerFallback(RegisterRequest request, Exception e) {
