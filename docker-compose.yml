@@ -61,11 +61,29 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - prometheus
-
+  axonserver:
+    image: axoniq/axonserver:latest
+    container_name: axonserver
+    ports:
+      - "8024:8024"  # HTTP port for dashboard
+      - "8124:8124"  # gRPC port for clients
+      - "8224:8224"  # Monitoring port
+    environment:
+      - AXONSERVER_HOSTNAME=localhost
+    volumes:
+      - axonserver-data:/data
+      - axonserver-events:/eventdata
+      - axonserver-config:/config
 volumes:
   postgres_data:
     driver: local
   zookeeper_data:
     driver: local
   kafka_data:
+    driver: local
+  axonserver-data:
+    driver: local
+  axonserver-events:
+    driver: local
+  axonserver-config:
     driver: local

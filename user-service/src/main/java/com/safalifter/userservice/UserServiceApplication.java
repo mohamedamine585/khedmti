@@ -39,7 +39,7 @@ public class UserServiceApplication implements CommandLineRunner {
             queryGateway.query(new FindUserByUsernameQuery("admin"), Object.class).join();
         } catch (Exception e) {
             // Admin user doesn't exist, create it
-           /* CreateUserCommand command = CreateUserCommand.builder()
+           CreateUserCommand command = CreateUserCommand.builder()
                     .userId(UUID.randomUUID().toString())
                     .username("admin")
                     .email("admin@gmail.com")
@@ -47,7 +47,7 @@ public class UserServiceApplication implements CommandLineRunner {
                     .role(Role.ADMIN)
                     .active(Active.ACTIVE)
                     .build();
-            commandGateway.sendAndWait(command);*/
+            commandGateway.sendAndWait(command);
         }
     }
 }
