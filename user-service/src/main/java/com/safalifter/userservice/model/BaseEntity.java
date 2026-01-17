@@ -1,7 +1,9 @@
 package com.safalifter.userservice.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -14,6 +16,8 @@ import java.time.LocalDateTime;
 
 @MappedSuperclass
 @Getter
+@Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class BaseEntity implements Serializable {
     @Id
     @GeneratedValue(generator = "UUID")

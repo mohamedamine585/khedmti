@@ -1,10 +1,12 @@
 package com.safalifter.userservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.safalifter.userservice.enums.Active;
 import com.safalifter.userservice.enums.Role;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity(name = "users")
 @Builder
@@ -12,7 +14,8 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class User extends BaseEntity {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class User extends BaseEntity implements Serializable {
     @Column(unique = true, nullable = false)
     private String username;
 
