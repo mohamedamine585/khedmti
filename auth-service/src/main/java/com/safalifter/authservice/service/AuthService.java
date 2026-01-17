@@ -25,7 +25,7 @@ public class AuthService {
 
     // --- LOGIN AVEC RÉSILIENCE ET LIMITATION ---
     @CircuitBreaker(name = "userService", fallbackMethod = "loginFallback")
-    @RateLimiter(name = "loginLimiter", fallbackMethod = "loginRateLimitFallback")
+    //@RateLimiter(name = "loginLimiter", fallbackMethod = "loginRateLimitFallback")
     public TokenDto login(LoginRequest request) {
         Authentication authenticate = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
