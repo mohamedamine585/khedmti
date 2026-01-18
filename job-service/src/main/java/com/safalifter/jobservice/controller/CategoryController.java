@@ -5,9 +5,15 @@ import com.safalifter.jobservice.dto.JobDto;
 import com.safalifter.jobservice.request.category.CategoryCreateRequest;
 import com.safalifter.jobservice.request.category.CategoryUpdateRequest;
 import com.safalifter.jobservice.service.CategoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.SchemaProperty;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,13 +29,28 @@ public class CategoryController {
     private final CategoryService categoryService;
     private final ModelMapper modelMapper;
 
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<CategoryDto> createCategory(@Valid @RequestPart CategoryCreateRequest request,
-                                               @RequestPart(required = false) MultipartFile file) {
+    @Operation(
+            summary = "Create category with optional file",
+            description = "Send category name as request parameter + optional image as multipart/form-data"
+    )
+    public ResponseEntity<CategoryDto> createCategory(
+            @Parameter(description = "Category name", required = true)
+            @RequestParam("name") String name, // now name is a request param
+
+            @Parameter(description = "Image file", schema = @Schema(type = "string", format = "binary"))
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        // Map name to DTO
+        CategoryCreateRequest request = new CategoryCreateRequest();
+        request.setName(name);
+
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(modelMapper.map(categoryService.createCategory(request,file), CategoryDto.class));
+                .body(modelMapper.map(categoryService.createCategory(request, file), CategoryDto.class));
     }
+
+
 
     @GetMapping("/getAll")
     ResponseEntity<List<CategoryDto>> getAll() {
@@ -42,11 +63,27 @@ public class CategoryController {
         return ResponseEntity.ok(modelMapper.map(categoryService.getCategoryById(id), CategoryDto.class));
     }
 
-    @PutMapping("/update")
+    @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<JobDto> updateCategoryById(@Valid @RequestPart CategoryUpdateRequest request,
-                                              @RequestPart(required = false) MultipartFile file) {
-        return ResponseEntity.ok(modelMapper.map(categoryService.updateCategoryById(request,file), JobDto.class));
+    public ResponseEntity<JobDto> updateCategoryById(
+            @Parameter(description = "Category ID to update", required = true)
+            @RequestParam("id") String id,
+
+            @Parameter(description = "Category name", required = true)
+            @RequestParam("name") String name,
+
+            @Parameter(description = "Optional file", schema = @Schema(type = "string", format = "binary"))
+            @RequestPart(value = "file", required = false) MultipartFile file
+    ) {
+
+        // Map request parameters to DTO
+        CategoryUpdateRequest request = new CategoryUpdateRequest();
+        request.setId(id);
+        request.setName(name);
+
+        return ResponseEntity.ok(
+                modelMapper.map(categoryService.updateCategoryById(request, file), JobDto.class)
+        );
     }
 
     @DeleteMapping("/deleteCategoryById/{id}")

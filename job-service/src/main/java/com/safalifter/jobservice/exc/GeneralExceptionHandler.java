@@ -24,6 +24,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   @NonNull HttpStatus status,
                                                                   @NonNull WebRequest request) {
         Map<String, String> errors = new HashMap<>();
+        System.out.println(ex.getMessage());
         ex.getBindingResult().getAllErrors()
                 .forEach(x -> errors.put(((FieldError) x).getField(), x.getDefaultMessage()));
         return ResponseEntity.badRequest().body(errors);
@@ -32,6 +33,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(GenericErrorResponse.class)
     public ResponseEntity<?> genericError(GenericErrorResponse exception) {
         Map<String, String> errors = new HashMap<>();
+        System.out.println(exception.getMessage());
         errors.put("error", exception.getMessage());
         return new ResponseEntity<>(errors, exception.getHttpStatus());
     }
@@ -39,6 +41,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public final ResponseEntity<?> handleAllException(Exception ex) {
         Map<String, String> errors = new HashMap<>();
+        System.out.println(ex.getMessage());
         errors.put("error", ex.getMessage());
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
@@ -46,6 +49,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<?> notFoundException(NotFoundException exception) {
         Map<String, String> errors = new HashMap<>();
+        System.out.println(exception.getMessage());
         errors.put("error", exception.getMessage());
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
@@ -53,6 +57,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<?> unauthorizedException(UnauthorizedException exception) {
         Map<String, String> errors = new HashMap<>();
+        System.out.println(exception.getMessage());
         errors.put("error", exception.getMessage());
         return new ResponseEntity<>(errors, HttpStatus.UNAUTHORIZED);
     }
@@ -60,6 +65,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> accessDeniedException(AccessDeniedException exception) {
         Map<String, String> errors = new HashMap<>();
+        System.out.println(exception.getMessage());
         errors.put("error", exception.getMessage());
         return new ResponseEntity<>(errors, HttpStatus.FORBIDDEN);
     }

@@ -25,7 +25,7 @@ public class CategoryService {
 
         if (file != null)
             imageId = fileStorageClient.uploadImageToFIleSystem(file).getBody();
-
+        System.out.println(imageId);
         return categoryRepository.save(
                 Category.builder()
                         .name(request.getName())
