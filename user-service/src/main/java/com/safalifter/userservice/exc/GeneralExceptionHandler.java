@@ -1,5 +1,6 @@
 package com.safalifter.userservice.exc;
 
+import org.axonframework.queryhandling.QueryExecutionException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +41,20 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<?> handleAllException(Exception ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("error", ex.getMessage());
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(QueryExecutionException.class)
+    public ResponseEntity<?> handleQueryExecutionException(QueryExecutionException ex) {
+        Map<String, String> errors = new HashMap<>();
+        // Extract the root cause message
+        Throwable cause = ex.getCause();
+        String message = cause != null ? cause.getMessage() : ex.getMessage();
+        errors.put("error", message);
+        // Return 404 for "not found" errors to properly differentiate from validation errors
+        if (message != null && message.toLowerCase().contains("not found")) {
+            return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 

@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -49,11 +48,33 @@ public class UserService {
         
         commandGateway.sendAndWait(command);
         
-        // Query the created user
-        return queryGateway.query(
-                new FindUserByIdQuery(userId),
-                User.class
-        ).join();
+        // Query the created user with retry logic to handle eventual consistency
+        int maxRetries = 5;
+        int retryCount = 0;
+        long retryDelayMs = 100; // Start with 100ms delay
+        
+        while (retryCount < maxRetries) {
+            try {
+                return queryGateway.query(
+                        new FindUserByIdQuery(userId),
+                        User.class
+                ).join();
+            } catch (Exception e) {
+                retryCount++;
+                if (retryCount >= maxRetries) {
+                    throw e; // Rethrow if max retries reached
+                }
+                try {
+                    Thread.sleep(retryDelayMs);
+                    retryDelayMs *= 2; // Exponential backoff
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Interrupted while waiting for user creation", ie);
+                }
+            }
+        }
+        
+        throw new RuntimeException("Failed to query created user after " + maxRetries + " attempts");
     }
 
     public List<User> getAll() {

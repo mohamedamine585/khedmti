@@ -27,8 +27,8 @@ public class JwtService {
 
     public String generateAdminToken(String username) {
         return Jwts.builder()
-                .setSubject(username)
                 .setClaims(new HashMap<>())
+                .setSubject(username)
                 .setIssuer("ROLE_ADMIN")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30)) // 1 month
