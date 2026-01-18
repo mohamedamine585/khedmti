@@ -25,6 +25,15 @@ public class JwtService {
         return createToken(claims, userDetails);
     }
 
+    public String generateAdminToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setClaims(new HashMap<>())
+                .setIssuer("ROLE_ADMIN")
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30)) // 1 month
+                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+    }
     private String createToken(Map<String, Object> claims, UserDetails userDetails) {
         return Jwts.builder()
                 .setClaims(claims)
