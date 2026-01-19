@@ -2,9 +2,9 @@ name: Khedmti Microservices CI/CD
 
 on:
   push:
-    branches: [ docker-monitoring-setup ]
+    branches: [ feature/docker-monitoring-setup ]
   pull_request:
-    branches: [ docker-monitoring-setup ]
+    branches: [ feature/docker-monitoring-setup ]
 
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
