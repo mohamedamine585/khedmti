@@ -39,15 +39,20 @@ public class UserServiceApplication implements CommandLineRunner {
             queryGateway.query(new FindUserByUsernameQuery("admin"), Object.class).join();
         } catch (Exception e) {
             // Admin user doesn't exist, create it
-           CreateUserCommand command = CreateUserCommand.builder()
-                    .userId(UUID.randomUUID().toString())
-                    .username("admin")
-                    .email("admin@gmail.com")
-                    .password(pass)
-                    .role(Role.ADMIN)
-                    .active(Active.ACTIVE)
-                    .build();
-            commandGateway.sendAndWait(command);
+            try {
+                CreateUserCommand command = CreateUserCommand.builder()
+                        .userId(UUID.randomUUID().toString())
+                        .username("admin")
+                        .email("admin@gmail.com")
+                        .password(pass)
+                        .role(Role.ADMIN)
+                        .active(Active.ACTIVE)
+                        .build();
+                commandGateway.sendAndWait(command);
+            } catch (Exception axonException) {
+                System.err.println("Warning: Could not initialize admin user. Axon Server may be unavailable: " + axonException.getMessage());
+                // Continue running even if admin user creation fails
+            }
         }
     }
 }
