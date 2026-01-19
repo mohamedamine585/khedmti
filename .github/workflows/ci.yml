@@ -37,21 +37,17 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Make mvnw executable
-        working-directory: ./${{ matrix.service }}
-        run: chmod +x ./mvnw
-
       - name: Build ${{ matrix.service }}
         working-directory: ./${{ matrix.service }}
-        run: ./mvnw clean compile -DskipTests
+        run: mvn clean compile -DskipTests
 
       - name: Run tests for ${{ matrix.service }}
         working-directory: ./${{ matrix.service }}
-        run: ./mvnw test
+        run: mvn test
 
       - name: Package ${{ matrix.service }}
         working-directory: ./${{ matrix.service }}
-        run: ./mvnw package -DskipTests
+        run: mvn package -DskipTests
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
